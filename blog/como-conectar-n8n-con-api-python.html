@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cómo conectar n8n con una API de Python — KEPA tecnologIA</title>
+<meta name="description" content="Guía práctica para conectar un workflow de n8n con una API hecha en Python (FastAPI). Paso a paso, con ejemplo de payload y buenas prácticas. Por Kepa Bilbao, Bilbao." />
+<link rel="canonical" href="https://kepatecnologia.com/blog/como-conectar-n8n-con-api-python.html" />
+
+<!-- Open Graph -->
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Cómo conectar n8n con una API de Python" />
+<meta property="og:description" content="Guía práctica paso a paso: workflow de n8n llamando a una API de Python (FastAPI). Con ejemplo real y buenas prácticas." />
+<meta property="og:url" content="https://kepatecnologia.com/blog/como-conectar-n8n-con-api-python.html" />
+<meta property="og:image" content="https://kepatecnologia.com/assets/kepa-photo.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Syne:wght@600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<!-- JSON-LD · Article (GEO / E-E-A-T) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Cómo conectar n8n con una API de Python",
+  "description": "Guía práctica para conectar un workflow de n8n con una API hecha en Python (FastAPI): paso a paso, ejemplo de payload y buenas prácticas.",
+  "inLanguage": "es-ES",
+  "datePublished": "2026-06-21",
+  "dateModified": "2026-06-21",
+  "image": "https://kepatecnologia.com/assets/kepa-photo.png",
+  "author": {
+    "@type": "Person",
+    "name": "Kepa Bilbao",
+    "jobTitle": "Consultor de IA y Automatización",
+    "url": "https://kepatecnologia.com/",
+    "sameAs": [
+      "https://www.linkedin.com/in/kepa-bilbao",
+      "https://www.fiverr.com/kepabilbotech"
+    ]
+  },
+  "publisher": {
+    "@type": "ProfessionalService",
+    "name": "KEPA tecnologIA",
+    "url": "https://kepatecnologia.com/"
+  },
+  "about": ["n8n", "Python", "FastAPI", "Automatización", "APIs", "Webhooks"],
+  "proficiencyLevel": "Beginner",
+  "keywords": "n8n, Python, FastAPI, API, webhook, automatización, integración"
+}
+</script>
+
+<style>
+  :root {
+    --bg: #060606; --surface: #0d0d0e; --surface-2: #131315;
+    --border: rgba(255,255,255,0.07); --border-strong: rgba(255,255,255,0.14);
+    --border-orange: rgba(255,106,20,0.35);
+    --text: #f3eee9; --text-dim: #a8a39c; --text-mute: #6a655e;
+    --orange: #ff6a14; --orange-bright: #ff8434; --orange-soft: rgba(255,106,20,0.18);
+    --cyan: #00d4ff;
+    --font-head: "Anton","Syne",ui-sans-serif,system-ui,sans-serif;
+    --font-display: "Syne",ui-sans-serif,system-ui,sans-serif;
+    --font-mono: "DM Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-mono); font-weight: 400; font-size: 16px; line-height: 1.7;
+    -webkit-font-smoothing: antialiased; min-height: 100vh; position: relative;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,106,20,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,106,20,0.04) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 90% 70% at 50% 20%, #000 50%, transparent 100%);
+  }
+  a { color: inherit; text-decoration: none; }
+  ::selection { background: var(--orange); color: #060606; }
+
+  .wrap { max-width: 820px; margin: 0 auto; padding: 0 28px; position: relative; z-index: 1; }
+  @media (max-width: 640px) { .wrap { padding: 0 20px; } }
+
+  /* nav */
+  .nav { border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50;
+    background: rgba(6,6,6,0.82); backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); }
+  .nav-inner { max-width: 1240px; margin: 0 auto; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-family: var(--font-head); font-size: 22px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .logo .ia { color: var(--orange); }
+  .logo .dim { color: var(--text-dim); }
+  .nav-back { font-family: var(--font-mono); font-size: 13px; color: var(--text-dim); transition: color 160ms; }
+  .nav-back:hover { color: var(--orange); }
+
+  /* article */
+  article { padding: 64px 0 40px; position: relative; z-index: 1; }
+  .crumb { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--orange); margin-bottom: 22px; }
+  .crumb a { color: var(--text-mute); }
+  .crumb a:hover { color: var(--text-dim); }
+  h1 { font-family: var(--font-head); font-weight: 400; font-size: clamp(34px, 6vw, 56px); line-height: 1.04; letter-spacing: 0.01em; margin-bottom: 22px; text-wrap: balance; }
+  .meta { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; font-family: var(--font-mono); font-size: 13px; color: var(--text-mute); padding-bottom: 30px; margin-bottom: 38px; border-bottom: 1px solid var(--border); }
+  .meta .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text-mute); }
+  .meta b { color: var(--text-dim); font-weight: 500; }
+
+  .lede { font-family: var(--font-display); font-weight: 600; font-size: clamp(19px, 2.6vw, 23px); line-height: 1.5; color: var(--text); margin-bottom: 38px; }
+
+  article h2 { font-family: var(--font-display); font-weight: 700; font-size: clamp(22px, 3.4vw, 28px); letter-spacing: 0.005em; margin: 48px 0 16px; color: var(--text); }
+  article h2 .n { color: var(--orange); font-family: var(--font-mono); font-size: 0.62em; margin-right: 10px; vertical-align: 0.18em; }
+  article p { color: var(--text-dim); margin-bottom: 18px; }
+  article p strong, article li strong { color: var(--text); font-weight: 500; }
+  article ul, article ol { color: var(--text-dim); margin: 0 0 18px; padding-left: 22px; }
+  article li { margin-bottom: 8px; }
+  article a.inline { color: var(--orange); border-bottom: 1px solid var(--border-orange); }
+  article a.inline:hover { border-color: var(--orange); }
+
+  code { font-family: var(--font-mono); font-size: 0.88em; background: var(--surface-2); color: var(--orange-bright); padding: 2px 7px; border-radius: 5px; border: 1px solid var(--border); }
+  pre { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--orange); border-radius: 12px; padding: 22px 24px; overflow-x: auto; margin: 0 0 26px; }
+  pre code { background: none; border: none; padding: 0; color: var(--text-dim); font-size: 13.5px; line-height: 1.7; display: block; }
+  pre .c { color: var(--text-mute); }
+  pre .k { color: var(--cyan); }
+  pre .s { color: #8fce6b; }
+
+  .callout { background: rgba(255,106,20,0.05); border: 1px solid var(--border-orange); border-radius: 12px; padding: 20px 24px; margin: 0 0 26px; }
+  .callout .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--orange); margin-bottom: 8px; }
+  .callout p { margin: 0; color: var(--text-dim); }
+
+  /* CTA */
+  .post-cta { margin: 56px 0 0; padding: 36px 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; text-align: center; }
+  .post-cta h3 { font-family: var(--font-head); font-weight: 400; font-size: 28px; letter-spacing: 0.01em; margin-bottom: 12px; }
+  .post-cta p { color: var(--text-dim); margin-bottom: 22px; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 14px; padding: 14px 26px; border-radius: 999px; background: var(--orange); color: #060606; font-weight: 500; transition: box-shadow 200ms, transform 200ms; }
+  .btn:hover { box-shadow: 0 0 30px -6px rgba(255,106,20,0.6); transform: translateY(-2px); }
+
+  footer { border-top: 1px solid var(--border); margin-top: 70px; padding: 34px 0; position: relative; z-index: 1; }
+  .foot { display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 12.5px; color: var(--text-mute); }
+  .foot a { color: var(--text-dim); }
+  .foot a:hover { color: var(--orange); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html#top" class="logo" aria-label="Kepa tecnologIA — inicio">KEPA <span class="dim">·</span> TECNOLOG<span class="ia">IA</span></a>
+    <a href="../index.html#blog" class="nav-back">← Volver al blog</a>
+  </div>
+</nav>
+
+<article>
+  <div class="wrap">
+    <div class="crumb"><a href="../index.html#top">Inicio</a> / <a href="../index.html#blog">Blog</a> / How-To</div>
+
+    <h1>Cómo conectar n8n con una API de Python</h1>
+
+    <div class="meta">
+      <span>Por <b>Kepa Bilbao</b></span>
+      <span class="dot"></span>
+      <span>Automatización</span>
+      <span class="dot"></span>
+      <span>4 min de lectura</span>
+      <span class="dot"></span>
+      <span>Bilbao</span>
+    </div>
+
+    <p class="lede">n8n es excelente conectando servicios, pero a veces necesitas lógica que ningún nodo cubre: un cálculo, un scraping, un modelo propio. La solución limpia es exponer esa lógica como una pequeña API de Python y llamarla desde el workflow. Así se hace.</p>
+
+    <h2><span class="n">01</span>Cuándo tiene sentido</h2>
+    <p>No todo necesita Python. Tira de una API propia cuando: la transformación es <strong>demasiado compleja</strong> para el nodo <em>Function</em>, necesitas una <strong>librería de Python</strong> concreta (pandas, un modelo, un PDF parser), o quieres <strong>reutilizar</strong> la misma lógica desde varios workflows. Para un <code>if</code> sencillo, quédate en n8n.</p>
+
+    <h2><span class="n">02</span>Monta una API mínima con FastAPI</h2>
+    <p>FastAPI es la opción más rápida: pocas líneas y documentación automática. Un endpoint que recibe datos y devuelve un resultado:</p>
+    <pre><code><span class="c"># main.py</span>
+<span class="k">from</span> fastapi <span class="k">import</span> FastAPI, Header, HTTPException
+<span class="k">from</span> pydantic <span class="k">import</span> BaseModel
+
+app = FastAPI()
+
+<span class="k">class</span> Cliente(BaseModel):
+    nombre: str
+    email: str
+
+<span class="k">@app.post</span>(<span class="s">"/procesar"</span>)
+<span class="k">def</span> procesar(data: Cliente, x_api_key: str = Header(None)):
+    <span class="k">if</span> x_api_key != <span class="s">"TU_CLAVE_SECRETA"</span>:
+        <span class="k">raise</span> HTTPException(401, <span class="s">"No autorizado"</span>)
+    <span class="c"># tu lógica aquí</span>
+    <span class="k">return</span> {<span class="s">"nombre"</span>: data.nombre.title(), <span class="s">"ok"</span>: True}</code></pre>
+    <p>Levántala con <code>uvicorn main:app --host 0.0.0.0 --port 8000</code> y despliégala donde puedas (un VPS, Render, Railway o similar). Apunta el dominio o IP — lo necesitarás en n8n.</p>
+
+    <h2><span class="n">03</span>Llámala desde n8n con el nodo HTTP Request</h2>
+    <p>En tu workflow, añade un nodo <strong>HTTP Request</strong> y configúralo así:</p>
+    <ul>
+      <li><strong>Method:</strong> <code>POST</code></li>
+      <li><strong>URL:</strong> <code>https://tu-api.com/procesar</code></li>
+      <li><strong>Authentication / Headers:</strong> añade <code>x-api-key</code> con tu clave</li>
+      <li><strong>Body Content Type:</strong> <code>JSON</code></li>
+      <li><strong>Body:</strong> mapea los campos del paso anterior con expresiones, p. ej. <code>{{ $json.nombre }}</code></li>
+    </ul>
+    <p>El JSON que envías debe coincidir con el modelo de la API:</p>
+    <pre><code>{
+  <span class="s">"nombre"</span>: <span class="s">"{{ $json.nombre }}"</span>,
+  <span class="s">"email"</span>: <span class="s">"{{ $json.email }}"</span>
+}</code></pre>
+    <p>La respuesta de Python vuelve a n8n como un item normal: puedes encadenar el resultado (<code>{{ $json.nombre }}</code>) a un nodo de Airtable, Slack o lo que necesites.</p>
+
+    <h2><span class="n">04</span>Tres buenas prácticas que evitan dolores</h2>
+    <ul>
+      <li><strong>Protege siempre el endpoint</strong> con una API key (como arriba) o token. Una API abierta es una puerta abierta.</li>
+      <li><strong>Devuelve códigos HTTP correctos</strong> (200, 400, 401, 500). n8n puede ramificar según el código y reintentar solo cuando tiene sentido.</li>
+      <li><strong>Pon un timeout</strong> en el nodo HTTP Request. Si tu API tarda, mejor un fallo limpio que un workflow colgado.</li>
+    </ul>
+
+    <div class="callout">
+      <div class="tag">⚡ En la práctica</div>
+      <p>Este patrón — n8n orquestando + Python haciendo el trabajo pesado — es justo el que uso para automatizar altas de clientes y volcados de datos. n8n decide el «cuándo»; Python resuelve el «cómo».</p>
+    </div>
+
+    <p>Y ya está: n8n se encarga de orquestar (cuándo, con qué datos, a dónde va el resultado) y Python hace el trabajo pesado. Esta separación mantiene tus workflows limpios y tu lógica reutilizable.</p>
+
+    <div class="post-cta">
+      <h3>¿Tienes un proceso que repites a mano?</h3>
+      <p>Te enseño en 30 minutos si se puede automatizar — y cuánto tiempo recuperarías.</p>
+      <a href="../index.html#contacto" class="btn">Reservar consulta gratis →</a>
+    </div>
+  </div>
+</article>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <span>© 2026 KEPA tecnologIA · Kepa Bilbao · Bilbao</span>
+      <span><a href="../index.html#blog">← Más artículos</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
