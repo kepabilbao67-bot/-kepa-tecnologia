@@ -49,3 +49,12 @@
 - 10 min: 1 publicación (alterna Instagram/LinkedIn)
 - 10 min: responde comentarios/mensajes
 - 5 min: 3 solicitudes de conexión en LinkedIn a PYMEs locales
+
+
+---
+
+## 🎬 Vídeos (Reels / TikTok / Shorts)
+Guiones listos para grabar en `SCRIPTS-VIDEOS-TECNOLOGIA.md` (5 vídeos).
+- Graba vertical 9:16, edita en CapCut (subtítulos + texto), sube el mismo vídeo a
+  Reels + TikTok + YouTube Shorts.
+- 3-5 vídeos por semana. Cuenta separada del negocio del oro.
