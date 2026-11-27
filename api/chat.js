@@ -9,8 +9,11 @@
 // - Límite de peticiones por IP (en memoria, por instancia: es un freno
 //   básico; para un límite global usa Vercel Firewall / Upstash).
 
-const MODEL = 'claude-haiku-4-5-20251001';
-const MAX_TOKENS = 600;
+const MODEL = 'claude-haiku-5-5';
+// Claude Haiku 5.5 piensa por defecto y el pensamiento cuenta para max_tokens:
+// margen para pensar además de la respuesta corta. Effort "low": chat rápido y barato.
+const MAX_TOKENS = 1500;
+const EFFORT = 'low';
 const MAX_MESSAGES = 12;
 const MAX_MESSAGE_CHARS = 1000;
 const MAX_TOTAL_CHARS = 6000;
@@ -177,7 +180,13 @@ export default async function handler(req, res) {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01'
       },
-      body: JSON.stringify({ model: MODEL, max_tokens: MAX_TOKENS, system, messages })
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: MAX_TOKENS,
+        output_config: { effort: EFFORT },
+        system,
+        messages
+      })
     });
 
     const data = await r.json().catch(() => null);
@@ -187,7 +196,15 @@ export default async function handler(req, res) {
       return;
     }
 
-    const reply = (data && data.content && data.content[0] && data.content[0].text) ? data.content[0].text : '';
+    // La respuesta puede empezar con bloques "thinking": se juntan solo los de texto.
+    // Si el modelo rechaza la petición (stop_reason "refusal"), reply queda vacío y
+    // la web muestra su mensaje de error con el enlace a WhatsApp.
+    if (data && data.stop_reason === 'refusal') {
+      console.warn('Petición rechazada por el modelo', data.stop_details && data.stop_details.category);
+    }
+    const reply = (data && data.stop_reason !== 'refusal' && Array.isArray(data.content))
+      ? data.content.filter(b => b && b.type === 'text').map(b => b.text).join('')
+      : '';
     res.status(200).json({ reply });
   } catch (e) {
     console.error('Chat proxy failure', e);
