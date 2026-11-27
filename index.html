@@ -4089,15 +4089,17 @@
       }
     });
 
-    /* usa el puente window.claude en este entorno; en producción llama a /api/chat */
+    /* usa el puente window.claude en este entorno; en producción llama a /api/chat
+       (api/chat.js tiene su propia copia de SYSTEM, que es la que manda en producción) */
     async function getReply(messages) {
       if (window.claude && typeof window.claude.complete === 'function') {
         return await window.claude.complete({ messages });
       }
+      // En producción el prompt de sistema lo pone el servidor: solo se envía la conversación.
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ messages })
+        body: JSON.stringify({ messages: messages.slice(2), lang: kiaLang() })
       });
       if (!res.ok) throw new Error('api ' + res.status);
       const data = await res.json();
