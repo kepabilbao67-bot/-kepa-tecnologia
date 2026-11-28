@@ -1,0 +1,73 @@
+/* Estilos del panel Tweaks (personalización en vivo).
+   Extraído de index.html; se carga en el mismo orden y posición que antes. */
+
+#twPanel {
+  position: fixed; top: 76px; right: 20px; z-index: 400;
+  width: 300px; max-height: calc(100vh - 100px); overflow-y: auto;
+  display: none; flex-direction: column;
+  background: rgba(10,10,11,0.96); border: 1px solid var(--border-strong);
+  border-radius: 16px; padding: 16px 16px 18px;
+  box-shadow: 0 30px 70px -24px rgba(0,0,0,0.95);
+  backdrop-filter: blur(14px);
+  font-family: var(--font-mono); color: var(--text);
+}
+#twPanel.show { display: flex; }
+#twPanel::-webkit-scrollbar { width: 8px; }
+#twPanel::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 8px; }
+.tw-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.tw-title { font-family: var(--font-head); font-size: 20px; letter-spacing: 0.02em; text-transform: uppercase; }
+.tw-title span { color: var(--orange); }
+.tw-x { background: none; border: none; color: var(--text-mute); cursor: pointer; font-size: 20px; line-height: 1; padding: 2px 4px; }
+.tw-x:hover { color: var(--text); }
+.tw-note { font-size: 10.5px; color: var(--text-mute); line-height: 1.5; margin-bottom: 12px; }
+.tw-sec { border-top: 1px solid var(--border); padding-top: 13px; margin-top: 13px; }
+.tw-sec:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+.tw-sec-h { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--orange); margin-bottom: 11px; }
+.tw-row { margin-bottom: 13px; }
+.tw-row:last-child { margin-bottom: 0; }
+.tw-lbl { display: block; font-size: 11.5px; color: var(--text-dim); margin-bottom: 8px; }
+.tw-lbl b { color: var(--text); font-weight: 500; }
+.tw-swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.tw-sw { width: 26px; height: 26px; border-radius: 7px; border: 2px solid transparent; cursor: pointer; padding: 0; transition: transform 140ms; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12); }
+.tw-sw:hover { transform: scale(1.1); }
+.tw-sw.active { border-color: var(--text); }
+.tw-seg { display: flex; gap: 6px; }
+.tw-seg button { flex: 1; font-family: var(--font-mono); font-size: 11px; padding: 7px 6px; border-radius: 8px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-mute); cursor: pointer; transition: all 150ms; }
+.tw-seg button:hover { color: var(--text-dim); border-color: var(--border-orange); }
+.tw-seg button.active { border-color: var(--orange); color: var(--orange); background: rgba(255,106,20,0.08); }
+.tw-range { display: flex; align-items: center; gap: 10px; }
+.tw-range input[type=range] { flex: 1; accent-color: var(--orange); }
+.tw-range .tw-val { font-size: 11px; color: var(--text); min-width: 40px; text-align: right; }
+.tw-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; margin-bottom: 11px; }
+.tw-toggle:last-child { margin-bottom: 0; }
+.tw-toggle span { font-size: 11.5px; color: var(--text-dim); }
+.tw-sw2 { width: 38px; height: 21px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border-strong); position: relative; transition: background 160ms, border-color 160ms; flex: 0 0 auto; }
+.tw-sw2::after { content: ""; position: absolute; top: 2px; left: 2px; width: 15px; height: 15px; border-radius: 50%; background: var(--text-mute); transition: transform 160ms, background 160ms; }
+.tw-toggle.on .tw-sw2 { background: rgba(255,106,20,0.25); border-color: var(--orange); }
+.tw-toggle.on .tw-sw2::after { transform: translateX(17px); background: var(--orange); }
+.tw-select { width: 100%; font-family: var(--font-mono); font-size: 12px; padding: 9px 11px; border-radius: 9px; background: var(--surface); border: 1px solid var(--border-strong); color: var(--text); cursor: pointer; }
+.tw-select:focus { outline: none; border-color: var(--orange); }
+/* live helper rules */
+html.tw-nodeco .corner-deco { display: none !important; }
+html.tw-nobadge .badge { display: none !important; }
+html.tw-noguide #guideBtn, html.tw-noguide #guideLangs { display: none !important; }
+html.tw-nomusic #musicBtn { display: none !important; }
+html.tw-nochat #kiaWidget { display: none !important; }
+html.tw-noanim *, html.tw-noanim *::before, html.tw-noanim *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+html.tw-dense-compact section { padding: 72px 0 !important; }
+html.tw-dense-compact .hero { padding: 130px 0 70px !important; }
+html.tw-dense-compact .sec-head { margin-bottom: 38px !important; }
+html.tw-dense-airy section { padding: 168px 0 !important; }
+html.tw-dense-airy .hero { padding: 210px 0 130px !important; }
+html.tw-dense-airy .sec-head { margin-bottom: 74px !important; }
+/* corner radius system (only active when tweaked away from baseline 16) */
+html.tw-radius .stats, html.tw-radius .service, html.tw-radius .stack-wrap,
+html.tw-radius .gen-canvas, html.tw-radius .price-card, html.tw-radius .case,
+html.tw-radius .contact-form, html.tw-radius .contact-direct, html.tw-radius .photo-frame,
+html.tw-radius .ig-post { border-radius: calc(var(--twr) * 1px) !important; }
+html.tw-radius .cta-wrap, html.tw-radius .kia-panel { border-radius: calc(var(--twr) * 1.3px) !important; }
+html.tw-radius .btn, html.tw-radius .gen-act, html.tw-radius .gen-chip,
+html.tw-radius .gen-field textarea, html.tw-radius .service-ico, html.tw-radius .ch-ico,
+html.tw-radius .contact-channel, html.tw-radius .contact-form input,
+html.tw-radius .contact-form textarea, html.tw-radius .bk-day,
+html.tw-radius .bk-nav button { border-radius: calc(var(--twr) * 0.6px) !important; }
